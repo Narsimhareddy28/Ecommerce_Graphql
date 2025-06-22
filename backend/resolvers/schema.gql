@@ -1,0 +1,73 @@
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  role: String!
+  token: String
+}
+
+type Category {
+  id: ID!
+  name: String!
+  description: String
+}
+
+type Product {
+  id: ID!
+  title: String!
+  description: String
+  price: Float!
+  images: [String]
+  category: Category!
+  sellerId: ID!
+}
+
+type Query {
+  me: User
+
+  # User (admin-only)
+  getAllUsers: [User]
+  getUser(id: ID!): User
+
+  # Categories
+  getAllCategories: [Category]
+  getCategory(id: ID!): Category
+
+  # Products
+  getAllProducts: [Product]
+  getProduct(id: ID!): Product
+  getProductsByCategory(categoryId: ID!): [Product]
+  getProductsBySeller: [Product]
+}
+
+type Mutation {
+  # Auth
+  register(name: String!, email: String!, password: String!, role: String): User
+  login(email: String!, password: String!): User
+  deleteUser(id: ID!): Boolean
+
+  # Category (admin or seller)
+  addCategory(name: String!, description: String): Category
+  updateCategory(id: ID!, name: String, description: String): Category
+  deleteCategory(id: ID!): Boolean
+
+  # Product (admin or seller)
+  addProduct(
+    title: String!
+    description: String
+    price: Float!
+    images: [String]
+    category: ID!
+  ): Product
+
+  updateProduct(
+    id: ID!
+    title: String
+    description: String
+    price: Float
+    images: [String]
+    category: ID
+  ): Product
+
+  deleteProduct(id: ID!): Boolean
+}
