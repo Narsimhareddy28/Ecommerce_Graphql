@@ -1,0 +1,52 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LangGraph State Flow</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <h1>LangGraph State Flow</h1>
+    <div class="mermaid">
+
+graph TD
+    START([🚀 User Message]) --> A["🧠 classifyIntent<br/>---<br/>Input: userMessage<br/>Process: AI analysis<br/>Output: intent"]
+    
+    A --> B{🚦 Route by Intent}
+    
+    B -->|PRODUCT_SEARCH<br/>PRODUCT_COMPARE| C["🔍 searchProducts<br/>---<br/>Input: userMessage<br/>Process: Database query<br/>Output: searchResults[]"]
+    B -->|CATEGORY_BROWSE| D["📂 browseCategories<br/>---<br/>Input: userMessage<br/>Process: Load categories<br/>Output: categories[]"]
+    B -->|GREETING<br/>GENERAL_HELP| E["💬 generateGeneralResponse<br/>---<br/>Input: userMessage<br/>Process: AI response<br/>Output: response"]
+    
+    C --> F{🚦 Route by Results}
+    
+    F -->|intent=COMPARE<br/>& multiple products| G["⚖️ compareProducts<br/>---<br/>Input: searchResults[]<br/>Process: AI comparison<br/>Output: response"]
+    F -->|otherwise| H["📝 generateProductResponse<br/>---<br/>Input: searchResults[]<br/>Process: AI description<br/>Output: response"]
+    
+    D --> I["🏷️ generateCategoryResponse<br/>---<br/>Input: categories[]<br/>Process: Format response<br/>Output: response"]
+    
+    G --> END([🏁 Final Response])
+    H --> END
+    I --> END
+    E --> END
+    
+    %% State object
+    J["📊 State Object<br/>---<br/>userMessage: string<br/>intent: string<br/>searchResults: Product[]<br/>categories: Category[]<br/>response: string<br/>responseType: string<br/>products: Product[]<br/>error: string"]
+    
+    %% Styling
+    classDef startEnd fill:#e1f5fe,stroke:#01579b,stroke-width:3px
+    classDef node fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef decision fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef state fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    
+    class START,END startEnd
+    class A,C,D,E,G,H,I node
+    class B,F decision
+    class J state
+
+    </div>
+    <script>
+        mermaid.initialize({startOnLoad:true});
+    </script>
+</body>
+</html>

@@ -16,4 +16,6 @@ const connectDB = async()=>{
     }
 }
 
+export const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyDb1j1aM7LjuKbvJBS6Nrsb1OP1o2ssJmY';
+
 export default connectDB;

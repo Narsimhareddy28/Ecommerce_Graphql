@@ -1,4 +1,5 @@
 import { Category } from '../models/Category.js';
+import { Product } from '../models/Products.js';
 
 const categoryResolvers = {
     Query: {
@@ -14,12 +15,33 @@ const categoryResolvers = {
                 throw new Error('Category not found');
             }
             return category;
+        },
+
+        getCategoriesBySeller: async (_, __, context) => {
+            if (!context.user || context.user.role !== 'seller') {
+                throw new Error('Only sellers can view their categories');
+            }
+            
+            // Get all products by this seller
+            const sellerProducts = await Product.find({ sellerId: context.user.id });
+            
+            // Get unique category IDs from seller's products
+            const categoryIds = [...new Set(sellerProducts.map(product => product.category))];
+            
+            // Get categories that are used by seller's products
+            const categories = await Category.find({ _id: { $in: categoryIds } });
+            
+            return categories;
         }
 
 },
 
     Mutation:{
-                addCategory: async(_,{name, description})=>{
+                addCategory: async(_,{name, description}, context)=>{
+                    console.log('AddCategory context:', context.user);
+                    if (!context.user || context.user.role !== 'admin') {
+                        throw new Error('Only admin can create categories');
+                    }
                     if (!name){
                         throw new Error('Name is required');
                     }
@@ -31,8 +53,8 @@ const categoryResolvers = {
                     return category;
                 },
        updateCategory: async (_, { id, name, description }, context) => {
-     if (!context.user || !['admin', 'seller'].includes(context.user.role)) {
-  throw new Error('Only admin or seller can perform this action');
+     if (!context.user || context.user.role !== 'admin') {
+  throw new Error('Only admin can update categories');
 }
       const category = await Category.findById(id);
       if (!category) throw new Error('Category not found');
@@ -45,8 +67,8 @@ const categoryResolvers = {
     },
 
 deleteCategory: async (_, { id }, context) => {
-     if (!context.user || !['admin', 'seller'].includes(context.user.role)) {
-  throw new Error('Only admin or seller can perform this action');
+     if (!context.user || context.user.role !== 'admin') {
+  throw new Error('Only admin can delete categories');
 }
 
       const category = await Category.findById(id);

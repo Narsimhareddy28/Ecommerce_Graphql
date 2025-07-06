@@ -26,14 +26,18 @@ const server = new ApolloServer({
   app.use('/graphql', expressMiddleware(server, {
     context: async ({ req }) => {
       const token = req.headers.authorization?.split(" ")[1];
+      console.log('Token received:', token ? 'Yes' : 'No');
       try {
         if (token) {
           const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          console.log('Decoded user:', { id: decoded.id, role: decoded.role });
           return { user: decoded };
         }
-      } catch {
+      } catch (error) {
+        console.log('Token verification error:', error.message);
         return { user: null };
       }
+      return { user: null };
     }
   }));
 

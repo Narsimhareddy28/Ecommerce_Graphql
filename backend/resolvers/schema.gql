@@ -14,12 +14,47 @@ type Category {
 
 type Product {
   id: ID!
-  title: String!
+  name: String!
   description: String
   price: Float!
   images: [String]
   category: Category!
   sellerId: ID!
+}
+
+type OrderProduct {
+  product: Product!
+  quantity: Int!
+}
+
+type Order {
+  id: ID!
+  products: [OrderProduct!]!
+  totalAmount: Float!
+  customerId: ID!
+  status: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input OrderProductInput {
+  product: ID!
+  quantity: Int!
+}
+
+type ChatResponse {
+  message: String!
+  type: String!
+  products: [Product!]!
+  timestamp: String!
+}
+
+type ChatMessage {
+  id: ID!
+  message: String!
+  response: String!
+  timestamp: String!
+  userId: ID!
 }
 
 type Query {
@@ -38,6 +73,14 @@ type Query {
   getProduct(id: ID!): Product
   getProductsByCategory(categoryId: ID!): [Product]
   getProductsBySeller: [Product]
+
+  # Orders
+  getMyOrders: [Order]
+  getAllOrders: [Order]
+  getOrdersBySeller: [Order]
+
+  # Chat
+  getChatHistory: [ChatMessage]
 }
 
 type Mutation {
@@ -70,4 +113,11 @@ type Mutation {
   ): Product
 
   deleteProduct(id: ID!): Boolean
+
+  # Orders
+  createOrder(products: [OrderProductInput!]!): Order
+  updateOrderStatus(id: ID!, status: String!): Order
+
+  # Chat
+  sendChatMessage(message: String!): ChatResponse
 }

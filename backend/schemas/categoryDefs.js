@@ -10,6 +10,7 @@ import gql from 'graphql-tag';
   extend type Query {
     getAllCategories: [Category]
     getCategory(id: ID!): Category
+    getCategoriesBySeller: [Category]
   }
 
   extend type Mutation {

@@ -1,0 +1,31 @@
+graph TD
+    START(["🚀 START"])
+    classifyIntent["⚙️ Intent Classification<br/><small>AI analyzes user message and determines intent</small>"]
+    searchProducts["⚙️ Product Search<br/><small>Search database for matching products</small>"]
+    browseCategories["⚙️ Browse Categories<br/><small>Load categories and sample products</small>"]
+    compareProducts["⚙️ Product Comparison<br/><small>AI generates detailed product comparison</small>"]
+    generateProductResponse["⚙️ Product Response<br/><small>AI generates product information response</small>"]
+    generateCategoryResponse["⚙️ Category Response<br/><small>Format category information response</small>"]
+    generateGeneralResponse["⚙️ General Response<br/><small>Handle general queries and greetings</small>"]
+    END(["🏁 END"])
+
+    START --> classifyIntent
+    classifyIntent -.->|"PRODUCT_SEARCH\nPRODUCT_COMPARE"| searchProducts
+    classifyIntent -.->|"CATEGORY_BROWSE"| browseCategories
+    classifyIntent -.->|"GREETING\nGENERAL_HELP"| generateGeneralResponse
+    searchProducts -.->|"intent=COMPARE\n& multiple products"| compareProducts
+    searchProducts -.->|"otherwise"| generateProductResponse
+    browseCategories --> generateCategoryResponse
+    compareProducts --> END
+    generateProductResponse --> END
+    generateCategoryResponse --> END
+    generateGeneralResponse --> END
+
+
+    %% Styling
+    classDef startEnd fill:#e1f5fe,stroke:#01579b,stroke-width:3px
+    classDef process fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef decision fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    
+    class START,END startEnd
+    class classifyIntent,searchProducts,browseCategories,compareProducts,generateProductResponse,generateCategoryResponse,generateGeneralResponse process
