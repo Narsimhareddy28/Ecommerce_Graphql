@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
 
 const CartContext = createContext()
 
@@ -17,37 +17,32 @@ export const CartProvider = ({ children }) => {
 
   // Load cart from localStorage on mount
   useEffect(() => {
-    console.log('=== CART CONTEXT: Loading from localStorage ===')
     const savedCart = localStorage.getItem('cart')
-    console.log('Saved cart from localStorage:', savedCart)
     
     if (savedCart) {
       try {
         const parsedCart = JSON.parse(savedCart)
-        console.log('Parsed cart:', parsedCart)
         setCartItems(parsedCart)
       } catch (error) {
         console.error('Error parsing cart from localStorage:', error)
         setCartItems([])
       }
-    } else {
-      console.log('No saved cart found in localStorage')
     }
     setIsInitialized(true)
-    console.log('=== CART CONTEXT: Loading complete ===')
   }, [])
 
-  // Save cart to localStorage whenever it changes (but not on initial load)
+  // Debounced localStorage save
   useEffect(() => {
-    if (!isInitialized) return // Don't save during initial load
+    if (!isInitialized) return
     
-    console.log('=== CART CONTEXT: Saving to localStorage ===')
-    console.log('Cart items to save:', cartItems)
-    localStorage.setItem('cart', JSON.stringify(cartItems))
-    console.log('Cart saved to localStorage')
+    const timeoutId = setTimeout(() => {
+      localStorage.setItem('cart', JSON.stringify(cartItems))
+    }, 100) // Debounce by 100ms to avoid excessive localStorage writes
+    
+    return () => clearTimeout(timeoutId)
   }, [cartItems, isInitialized])
 
-  const addToCart = (product, quantity = 1) => {
+  const addToCart = useCallback((product, quantity = 1) => {
     setCartItems(prevItems => {
       const existingItem = prevItems.find(item => item.id === product.id)
       
@@ -70,13 +65,13 @@ export const CartProvider = ({ children }) => {
         }]
       }
     })
-  }
+  }, [])
 
-  const removeFromCart = (productId) => {
+  const removeFromCart = useCallback((productId) => {
     setCartItems(prevItems => prevItems.filter(item => item.id !== productId))
-  }
+  }, [])
 
-  const updateQuantity = (productId, newQuantity) => {
+  const updateQuantity = useCallback((productId, newQuantity) => {
     if (newQuantity <= 0) {
       removeFromCart(productId)
       return
@@ -89,42 +84,51 @@ export const CartProvider = ({ children }) => {
           : item
       )
     )
-  }
+  }, [removeFromCart])
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setCartItems([])
-  }
+  }, [])
 
-  const getCartTotal = () => {
+  // Memoized calculations
+  const cartTotal = useMemo(() => {
     return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0)
-  }
+  }, [cartItems])
 
-  const getCartItemsCount = () => {
+  const cartItemsCount = useMemo(() => {
     return cartItems.reduce((count, item) => count + item.quantity, 0)
-  }
+  }, [cartItems])
 
-  const getTax = (taxRate = 0.08) => {
-    return getCartTotal() * taxRate
-  }
+  const getCartTotal = useCallback(() => {
+    return cartTotal
+  }, [cartTotal])
 
-  const getFinalTotal = (taxRate = 0.08) => {
-    return getCartTotal() + getTax(taxRate)
-  }
+  const getCartItemsCount = useCallback(() => {
+    return cartItemsCount
+  }, [cartItemsCount])
 
-  const isInCart = (productId) => {
+  const getTax = useCallback((taxRate = 0.08) => {
+    return cartTotal * taxRate
+  }, [cartTotal])
+
+  const getFinalTotal = useCallback((taxRate = 0.08) => {
+    return cartTotal + (cartTotal * taxRate)
+  }, [cartTotal])
+
+  const isInCart = useCallback((productId) => {
     return cartItems.some(item => item.id === productId)
-  }
+  }, [cartItems])
 
-  const getItemQuantity = (productId) => {
+  const getItemQuantity = useCallback((productId) => {
     const item = cartItems.find(item => item.id === productId)
     return item ? item.quantity : 0
-  }
+  }, [cartItems])
 
-  const toggleCart = () => {
+  const toggleCart = useCallback(() => {
     setIsCartOpen(!isCartOpen)
-  }
+  }, [isCartOpen])
 
-  const value = {
+  const value = useMemo(() => ({
     cartItems,
     isCartOpen,
     addToCart,
@@ -139,7 +143,21 @@ export const CartProvider = ({ children }) => {
     getItemQuantity,
     toggleCart,
     setIsCartOpen
-  }
+  }), [
+    cartItems,
+    isCartOpen,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    getCartTotal,
+    getCartItemsCount,
+    getTax,
+    getFinalTotal,
+    isInCart,
+    getItemQuantity,
+    toggleCart
+  ])
 
   return (
     <CartContext.Provider value={value}>

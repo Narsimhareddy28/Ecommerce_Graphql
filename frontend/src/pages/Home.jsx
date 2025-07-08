@@ -56,38 +56,43 @@ export default function Home() {
       ) : (
         <div style={styles.productsGrid}>
           {products.map((product) => (
-            <Link 
-              key={product.id} 
-              to={`/product/${product.id}`} 
-              style={styles.productCard}
-            >
-              <div style={styles.productImage}>
-                {product.images && product.images.length > 0 ? (
-                                   <ProductImage
-                                   src={product.images && product.images.length > 0 ? product.images[0] : null}
-                                   alt={product.name}
-                                   showHover={true}
-                                 />
-                ) : (
-                  <div style={styles.placeholderImage}>
-                    <span>No Image</span>
-                  </div>
-                )}
-              </div>
-              
-              <div style={styles.productInfo}>
-                <h3 style={styles.productTitle}>{product.name}</h3>
-                <p style={styles.productDescription}>
-                  {product.description?.length > 100 
-                    ? `${product.description.substring(0, 100)}...` 
-                    : product.description}
-                </p>
-                <div style={styles.productMeta}>
-                  <span style={styles.category}>{product.category?.name}</span>
-                  <span style={styles.price}>${product.price}</span>
+            <div key={product.id} style={styles.productCard}>
+              <Link 
+                to={`/product/${product.id}`} 
+                style={styles.productLinkArea}
+              >
+                <div style={styles.productImage}>
+                  {product.images && product.images.length > 0 ? (
+                                     <ProductImage
+                                     src={product.images && product.images.length > 0 ? product.images[0] : null}
+                                     alt={product.name}
+                                     showHover={true}
+                                   />
+                  ) : (
+                    <div style={styles.placeholderImage}>
+                      <span>No Image</span>
+                    </div>
+                  )}
                 </div>
+                
+                <div style={styles.productInfo}>
+                  <h3 style={styles.productTitle}>{product.name}</h3>
+                  <p style={styles.productDescription}>
+                    {product.description?.length > 100 
+                      ? `${product.description.substring(0, 100)}...` 
+                      : product.description}
+                  </p>
+                  <div style={styles.productMeta}>
+                    <span style={styles.category}>{product.category?.name}</span>
+                    <span style={styles.price}>${product.price}</span>
+                  </div>
+                </div>
+              </Link>
+              
+              <div style={styles.addToCartSection}>
+                <AddToCartButton product={product} />
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       )}
@@ -159,6 +164,10 @@ const styles = {
       boxShadow: '0 4px 16px rgba(0,0,0,0.15)'
     }
   },
+  productLinkArea: {
+    textDecoration: 'none',
+    color: 'inherit'
+  },
   productImage: {
     height: '200px',
     overflow: 'hidden',
@@ -212,5 +221,9 @@ const styles = {
     fontSize: '18px',
     fontWeight: 'bold',
     color: '#28a745'
+  },
+  addToCartSection: {
+    padding: '20px',
+    borderTop: '1px solid #eee'
   }
 } 
